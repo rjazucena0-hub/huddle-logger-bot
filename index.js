@@ -17,9 +17,9 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const SPREADSHEET_ID = process.env.SHEET_ID;
 const DEPARTMENTS = ['Tech', 'HR', 'Marketing', 'Sales', 'Finance']; 
 
-// 2. Setup Google Auth
+// 2. Setup Google Auth (Using Environment Variable for Security)
 const auth = new google.auth.GoogleAuth({
-    keyFile: 'credentials.json',
+    credentials: JSON.parse(process.env.GOOGLE_CREDS), 
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
@@ -152,6 +152,19 @@ bot.launch().then(() => {
     console.log("🚀 Bot is running...");
 }).catch((err) => {
     console.error("Failed to launch bot:", err.message);
+});
+
+// 5. Deployment Health Check (Crucial for Render)
+const http = require('http');
+
+// Render automatically provides the PORT variable
+const PORT = process.env.PORT || 3000;
+
+http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Bot is active and running!\n');
+}).listen(PORT, () => {
+    console.log(`✅ Health check server is listening on port ${PORT}`);
 });
 
 // Enable graceful stop
